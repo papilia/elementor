@@ -40,13 +40,6 @@ export default class Commands extends CommandsBackwardsCompatibility {
 	}
 
 	/**
-	 * @returns {Command}
-	 */
-	getCommandClass( id ) {
-		return this.commands[ id ]?.class;
-	}
-
-	/**
 	 * Function register().
 	 *
 	 * Register new command.
