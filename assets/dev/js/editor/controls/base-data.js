@@ -41,7 +41,7 @@ ControlBaseDataView = ControlBaseView.extend( {
 	},
 
 	behaviors: function() {
-		const behaviors = {},
+		const behaviors = ControlBaseView.prototype.behaviors.apply( this, arguments ),
 			dynamicSettings = this.options.model.get( 'dynamic' );
 
 		if ( dynamicSettings && dynamicSettings.active ) {
@@ -74,6 +74,44 @@ ControlBaseDataView = ControlBaseView.extend( {
 
 	getControlValue: function() {
 		return this.container.settings.get( this.model.get( 'name' ) );
+	},
+
+	getGlobalKey: function() {
+		return this.container.globals.get( this.model.get( 'name' ) );
+	},
+
+	getGlobalValue: function() {
+		return this.globalValue;
+	},
+
+	getCurrentValue: function() {
+		if ( this.getGlobalKey() && ! this.globalValue ) {
+			return '';
+		}
+
+		if ( this.globalValue ) {
+			return this.globalValue;
+		}
+
+		const controlValue = this.getControlValue();
+
+		if ( controlValue ) {
+			return controlValue;
+		}
+
+		const controlGlobalArgs = this.model.get( 'global' );
+
+		// TODO: FIND BETTER SOLUTION FOR GETTING THE DEFAULT VALUE
+		if ( controlGlobalArgs?.default ) {
+			const { command, args } = $e.data.commandExtractArgs( controlGlobalArgs.default ),
+				result = $e.data.getCache( $e.components.get( 'globals' ), command, args.query );
+
+			return result?.value;
+		}
+	},
+
+	isGlobalActive: function() {
+		return this.options.model.get( 'global' )?.active;
 	},
 
 	setValue: function( value ) {

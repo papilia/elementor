@@ -3,6 +3,8 @@ import panelView from './panel';
 import panelMenuView from './panel-menu';
 import PanelHeaderBehavior from './panel-header-behavior';
 import Repeater from './repeater';
+import GlobalControlSelect from './globals/global-select-behavior';
+import ControlsCSSParser from '../../../../assets/dev/js/editor/utils/controls-css-parser';
 
 export default class extends elementorModules.editor.utils.Module {
 	addPanelPages() {
@@ -45,6 +47,83 @@ export default class extends elementorModules.editor.utils.Module {
 			return behaviors;
 	}
 
+	addGlobalsBehavior( behaviors, view ) {
+		// The view can be a UI control which does not have this method
+		if ( ! view.isGlobalActive ) {
+			return;
+		}
+
+		const isGlobalActive = view.isGlobalActive();
+
+		if ( 'color' === view.options.model.get( 'type' ) && isGlobalActive ) {
+			behaviors.globals = {
+				behaviorClass: GlobalControlSelect,
+				popoverTitle: elementor.translate( 'global_colors_title' ),
+				manageButtonText: elementor.translate( 'manage_global_colors' ),
+				tooltipText: elementor.translate( 'global_colors_info' ),
+				newGlobalConfirmTitle: elementor.translate( 'create_global_color' ),
+			};
+		}
+
+		if ( 'popover_toggle' === view.options.model.get( 'type' ) && 'typography' === view.options.model.get( 'groupType' ) && isGlobalActive ) {
+			behaviors.globals = {
+				behaviorClass: GlobalControlSelect,
+				popoverTitle: elementor.translate( 'global_typography_title' ),
+				manageButtonText: elementor.translate( 'manage_global_typography' ),
+				tooltipText: elementor.translate( 'global_typography_info' ),
+				newGlobalConfirmTitle: elementor.translate( 'create_global_typography' ),
+			};
+		}
+
+		return behaviors;
+	}
+
+	// Use the Controls CSS Parser to add the global defaults CSS to the page
+	renderGlobalsDefaultCSS() {
+		const cssParser = new ControlsCSSParser( {
+			id: 'e-global-style',
+		} );
+
+		Object.values( elementor.widgetsCache ).forEach( ( widget ) => {
+			if ( ! widget.controls ) {
+				return;
+			}
+
+			const globalControls = [],
+				globalValues = {};
+
+			Object.values( widget.controls ).forEach( ( control ) => {
+				let globalControl = control;
+
+				if ( control.groupType ) {
+					globalControl = widget.controls[ control.groupPrefix + control.groupType ];
+				}
+
+				if ( control.global?.default ) {
+					globalValues[ control.name ] = globalControl.global.default;
+				}
+
+				if ( globalControl.global?.default ) {
+					globalControls.push( control );
+				}
+			} );
+
+			// TODO: Doesn't this cause an extra add_control_rules for non-global CSS?
+			globalControls.forEach( ( control ) => {
+				cssParser.addControlStyleRules(
+					control,
+					widget.controls, // values
+					widget.controls, // controls
+					[ '{{WRAPPER}}' ],
+					[ '.elementor-widget-' + widget.widget_type ],
+					globalValues
+				);
+			} );
+		} );
+
+		cssParser.addStyleToDocument();
+	}
+
 	onInit() {
 		super.onInit();
 
@@ -62,6 +141,10 @@ export default class extends elementorModules.editor.utils.Module {
 			elementor.addControlView( 'global-style-repeater', Repeater );
 
 			elementor.hooks.addFilter( 'panel/header/behaviors', this.addHeaderBehavior );
+
+			elementor.hooks.addFilter( 'controls/base/behaviors', this.addGlobalsBehavior );
+
+			elementor.on( 'preview:loaded', () => this.renderGlobalsDefaultCSS() );
 
 			elementor.on( 'panel:init', () => {
 				this.addPanelPages();
