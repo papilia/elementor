@@ -84,6 +84,25 @@ ControlBaseDataView = ControlBaseView.extend( {
 		return this.globalValue;
 	},
 
+	getGlobalDefault: function() {
+		const controlGlobalArgs = this.model.get( 'global' );
+
+		if ( controlGlobalArgs?.default ) {
+			// If the control is a color/typography control and default colors/typography are disabled, don't return the global value.
+			if ( ! elementor.config.globals.defaults_enabled[ this.getGlobalMeta().controlType ] ) {
+				return '';
+			}
+
+			const { command, args } = $e.data.commandExtractArgs( controlGlobalArgs.default ),
+				result = $e.data.getCache( $e.components.get( 'globals' ), command, args.query );
+
+			return result?.value;
+		}
+
+		// No global default.
+		return '';
+	},
+
 	getCurrentValue: function() {
 		if ( this.getGlobalKey() && ! this.globalValue ) {
 			return '';
@@ -99,15 +118,7 @@ ControlBaseDataView = ControlBaseView.extend( {
 			return controlValue;
 		}
 
-		const controlGlobalArgs = this.model.get( 'global' );
-
-		// TODO: FIND BETTER SOLUTION FOR GETTING THE DEFAULT VALUE
-		if ( controlGlobalArgs?.default ) {
-			const { command, args } = $e.data.commandExtractArgs( controlGlobalArgs.default ),
-				result = $e.data.getCache( $e.components.get( 'globals' ), command, args.query );
-
-			return result?.value;
-		}
+		return this.getGlobalDefault();
 	},
 
 	isGlobalActive: function() {

@@ -21,9 +21,9 @@ export default class ColorPicker extends elementorModules.Module {
 			classes: {
 				active: 'elementor-active',
 				pickerHeader: 'elementor-color-picker__header',
-				pickerToolsContainer: 'elementor-color-picker__tools',
+				pickerToolsContainer: 'e-color-picker__tools',
 				pickerTool: 'e-control-tool',
-				clearButton: 'elementor-color-picker__clear',
+				clearButton: 'e-color-picker__clear',
 				plusIcon: 'eicon-plus',
 			},
 		};
@@ -36,7 +36,7 @@ export default class ColorPicker extends elementorModules.Module {
 
 		this.picker = new Pickr( pickerSettings );
 
-		// Set a default palette. It doesn't affect the selected value
+		// Set a default palette. It doesn't affect the selected value.
 		this.picker.setColor( pickerSettings.default || '#020101' );
 
 		this.color = this.processColor();
@@ -80,7 +80,7 @@ export default class ColorPicker extends elementorModules.Module {
 		const color = this.picker.getColor(),
 			colorValue = color.toHEXA().toString( 0 );
 
-		//  Check if the display value is HEX or HEXA (HEXA = with transparency)
+		//  Check if the display value is HEX or HEXA (HEXA = with transparency).
 		const colorForNaming = 7 < colorValue.length ? colorValue.slice( 0, 7 ) : colorValue;
 
 		return ntc.name( colorForNaming )[ 1 ];
@@ -121,7 +121,7 @@ export default class ColorPicker extends elementorModules.Module {
 		} );
 	}
 
-	// Move the clear button from Pickr's default location into the Color Picker header
+	// Move the clear button from Pickr's default location into the Color Picker header.
 	createClearButton() {
 		const { classes } = this.getSettings();
 
@@ -140,7 +140,7 @@ export default class ColorPicker extends elementorModules.Module {
 	// TODO: CHECK IF THIS IS STILL NECESSARY
 	fixTipsyForFF( $button ) {
 		// There's a bug in FireFox about hiding the tooltip after the button was clicked,
-		// So let's force it to hide
+		// So let's force it to hide.
 		$button.data( 'tipsy' ).hide();
 	}
 

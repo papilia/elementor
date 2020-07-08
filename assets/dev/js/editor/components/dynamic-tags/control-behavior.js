@@ -28,9 +28,9 @@ module.exports = Marionette.Behavior.extend( {
 
 		if ( 'color' === this.view.model.get( 'type' ) ) {
 			if ( this.view.colorPicker ) {
-				this.onMoveDynamicSwitcherToColorPicker();
+				this.moveDynamicSwitcherToColorPicker();
 			} else {
-				setTimeout( () => this.onMoveDynamicSwitcherToColorPicker() );
+				setTimeout( () => this.moveDynamicSwitcherToColorPicker() );
 			}
 		}
 
@@ -43,7 +43,7 @@ module.exports = Marionette.Behavior.extend( {
 		} );
 	},
 
-	onMoveDynamicSwitcherToColorPicker: function() {
+	moveDynamicSwitcherToColorPicker: function() {
 		const $colorPickerToolsContainer = this.view.colorPicker.$pickerToolsContainer;
 
 		this.ui.dynamicSwitcher.removeClass( 'elementor-control-unit-1' ).addClass( 'e-control-tool' );
@@ -229,7 +229,7 @@ module.exports = Marionette.Behavior.extend( {
 
 		this.setTagView( elementor.helpers.getUniqueID(), $tag.data( 'tagName' ), {} );
 
-		// If an element has an active global value, disable it before applying the dynamic value
+		// If an element has an active global value, disable it before applying the dynamic value.
 		if ( this.view.getGlobalKey() ) {
 			this.view.triggerMethod( 'unset:global:value' );
 		}

@@ -2,8 +2,6 @@ export default class ControlsPopover {
 	constructor( child ) {
 		this.child = child;
 
-		this.groupControlName = child.model.get( 'groupPrefix' ) + 'typography';
-
 		this.$popover = jQuery( '<div>', { class: 'elementor-controls-popover' } );
 
 		child.$el.before( this.$popover );
@@ -24,7 +22,7 @@ export default class ControlsPopover {
 
 	createPopoverHeader() {
 		const $popoverToggleControl = this.$popover.prev(),
-			// Get the existing reset button
+			// Get the existing reset button.
 			$resetLabel = $popoverToggleControl.find( '.elementor-control-popover-toggle-reset-label' );
 
 		this.$popoverHeader = jQuery( '<div>', { class: 'e-group-control-header' } )
@@ -32,13 +30,12 @@ export default class ControlsPopover {
 
 		this.$headerControlsWrapper = jQuery( '<div>', { class: 'e-control-tools' } );
 
-		// Give the reset button the control tool styling,
-		// and add a click event so clicking on it closes the popover
+		// Give the reset button the control tool styling, and add a click event so clicking on it closes the popover.
 		$resetLabel
 			.addClass( 'e-control-tool' )
 			.on( 'click', () => this.onResetButtonClick() );
 
-		// Move the popover toggle reset button into the popover header
+		// Move the popover toggle reset button into the popover header.
 		this.$headerControlsWrapper.append( $resetLabel );
 		this.$popoverHeader.append( this.$headerControlsWrapper );
 
@@ -50,19 +47,21 @@ export default class ControlsPopover {
 
 		this.$popover
 			.prepend( this.$popoverHeader )
-			.addClass( 'e-typography-popover' );
+			.addClass( 'e-controls-popover--typography' );
 	}
 
 	onResetButtonClick() {
 		this.$popover.hide();
 
-		const args = {
+		const groupControlName = this.child.model.get( 'groupPrefix' ) + 'typography',
+			args = {
 			container: this.child.options.container,
-			settings: { [ this.groupControlName ]: '' },
+			settings: { [ groupControlName ]: '' },
 		};
 
-		if ( this.child.options.container.globals.get( this.groupControlName ) ) {
-			// The Disable Globals command applies global settings locally, so disabling the global doesn't actually change the appe.
+		if ( this.child.options.container.globals.get( groupControlName ) ) {
+			// The Disable Globals command applies global settings locally,
+			// so disabling the global shouldn't actually change the appearance of the widget.
 			$e.run( 'document/globals/disable', args );
 		} else {
 			$e.run( 'document/elements/settings', args );

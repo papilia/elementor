@@ -30,7 +30,7 @@ export default class ControlPopoverStarterView extends ControlChooseView {
 			return;
 		}
 
-		// If the control has a global value, unset the global
+		// If the control has a global value, unset the global.
 		if ( this.getGlobalKey() ) {
 			this.triggerMethod( 'unset:global:value' );
 		} else if ( this.isGlobalActive() ) {
@@ -39,14 +39,14 @@ export default class ControlPopoverStarterView extends ControlChooseView {
 	}
 
 	onPopoverToggleClick() {
-		if ( this.isGlobalActive() && ! this.getControlValue() && ! this.getGlobalKey() && this.model.get( 'global' )?.default ) {
+		if ( this.isGlobalActive() && ! this.getControlValue() && ! this.getGlobalKey() && this.getGlobalDefault() ) {
 			this.triggerMethod( 'unlink:global:default' );
 		}
 
 		this.$el.next( '.elementor-controls-popover' ).toggle();
 	}
 
-	getCommand() {
+	getGlobalCommand() {
 		return 'globals/typography';
 	}
 
@@ -54,7 +54,7 @@ export default class ControlPopoverStarterView extends ControlChooseView {
 		const cssObject = {};
 
 		Object.entries( globalValue ).forEach( ( [ property, value ] ) => {
-			// If a control value is empty, ignore it
+			// If a control value is empty, ignore it.
 			if ( ! value || '' === value.size ) {
 				return;
 			}
@@ -69,13 +69,13 @@ export default class ControlPopoverStarterView extends ControlChooseView {
 			}
 
 			if ( 'font_size' === property ) {
-				// Set max size for Typography previews in the select popover so it isn't too big
+				// Set max size for Typography previews in the select popover so it isn't too big.
 				if ( value.size > 40 ) {
 					value.size = 40;
 				}
 				cssObject.fontSize = value.size + value.unit;
 			} else {
-				// Convert the snake case property names into camel case to match their corresponding CSS property names
+				// Convert the snake case property names into camel case to match their corresponding CSS property names.
 				if ( property.includes( '_' ) ) {
 					property = property.replace( /([_][a-z])/g, ( result ) => result.toUpperCase().replace( '_', '' ) );
 				}
@@ -99,9 +99,10 @@ export default class ControlPopoverStarterView extends ControlChooseView {
 
 	getGlobalMeta() {
 		return {
-			commandName: this.getCommand(),
+			commandName: this.getGlobalCommand(),
 			key: this.model.get( 'name' ),
 			title: elementor.translate( 'new_typography_setting' ),
+			controlType: 'typography',
 		};
 	}
 
@@ -122,7 +123,7 @@ export default class ControlPopoverStarterView extends ControlChooseView {
 	}
 
 	async getGlobalsList() {
-		const result = await $e.data.get( this.getCommand() );
+		const result = await $e.data.get( this.getGlobalCommand() );
 
 		return result.data;
 	}
@@ -131,7 +132,7 @@ export default class ControlPopoverStarterView extends ControlChooseView {
 		const $globalTypographyContainer = jQuery( '<div>', { class: 'e-global__preview-items-container' } );
 
 		Object.values( globalTypographies ).forEach( ( typography ) => {
-			// Only build markup if the typography is valid
+			// Only build markup if the typography is valid.
 			if ( typography ) {
 				const $typographyPreview = this.createGlobalItemMarkup( typography );
 
@@ -143,7 +144,7 @@ export default class ControlPopoverStarterView extends ControlChooseView {
 	}
 
 	onAddGlobalButtonClick() {
-		this.triggerMethod( 'addGlobalToList', this.getAddGlobalConfirmMessage() );
+		this.triggerMethod( 'add:global:to:list', this.getAddGlobalConfirmMessage() );
 	}
 }
 

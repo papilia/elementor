@@ -4,7 +4,7 @@ import panelMenuView from './panel-menu';
 import PanelHeaderBehavior from './panel-header-behavior';
 import Repeater from './repeater';
 import GlobalControlSelect from './globals/global-select-behavior';
-import ControlsCSSParser from '../../../../assets/dev/js/editor/utils/controls-css-parser';
+import ControlsCSSParser from 'elementor-assets-js/editor/utils/controls-css-parser';
 
 export default class extends elementorModules.editor.utils.Module {
 	addPanelPages() {
@@ -48,7 +48,7 @@ export default class extends elementorModules.editor.utils.Module {
 	}
 
 	addGlobalsBehavior( behaviors, view ) {
-		// The view can be a UI control which does not have this method
+		// The view can be a UI control which does not have this method.
 		if ( ! view.isGlobalActive ) {
 			return;
 		}
@@ -78,11 +78,18 @@ export default class extends elementorModules.editor.utils.Module {
 		return behaviors;
 	}
 
-	// Use the Controls CSS Parser to add the global defaults CSS to the page
+	// Use the Controls CSS Parser to add the global defaults CSS to the page.
 	renderGlobalsDefaultCSS() {
 		const cssParser = new ControlsCSSParser( {
 			id: 'e-global-style',
-		} );
+		} ),
+			defaultColorsEnabled = elementor.config.globals.defaults_enabled.colors,
+			defaultTypographyEnabled = elementor.config.globals.defaults_enabled.typography;
+
+		// If both default colors and typography are disabled, there is no need to render schemes and default global css.
+		if ( ! defaultColorsEnabled && ! defaultTypographyEnabled ) {
+			return;
+		}
 
 		Object.values( elementor.widgetsCache ).forEach( ( widget ) => {
 			if ( ! widget.controls ) {
@@ -93,6 +100,13 @@ export default class extends elementorModules.editor.utils.Module {
 				globalValues = {};
 
 			Object.values( widget.controls ).forEach( ( control ) => {
+				const isColorControl = 'color' === control.type,
+					isTypographyControl = 'typography' === control.groupType;
+
+				if ( ( isColorControl && ! defaultColorsEnabled ) || ( isTypographyControl && ! defaultTypographyEnabled ) ) {
+					return;
+				}
+
 				let globalControl = control;
 
 				if ( control.groupType ) {
@@ -108,7 +122,6 @@ export default class extends elementorModules.editor.utils.Module {
 				}
 			} );
 
-			// TODO: Doesn't this cause an extra add_control_rules for non-global CSS?
 			globalControls.forEach( ( control ) => {
 				cssParser.addControlStyleRules(
 					control,
@@ -122,6 +135,13 @@ export default class extends elementorModules.editor.utils.Module {
 		} );
 
 		cssParser.addStyleToDocument();
+	}
+
+	refreshKitCssFiles() {
+		const $link = this.$previewContents.find( `#elementor-post-${ elementor.config.kit_id }-css` ),
+			href = $link.attr( 'href' ).split( '?' )[ 0 ];
+
+		$link.attr( { href: `${ href }?ver=${ ( new Date() ).getTime() }` } );
 	}
 
 	onInit() {
