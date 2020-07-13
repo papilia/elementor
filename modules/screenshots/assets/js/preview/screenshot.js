@@ -12,11 +12,12 @@ class Screenshot {
 		 * @var object
 		 */
 		this.config = {
+			empty_content_headline: 'Empty Content.',
 			crop: {
 				width: 1200,
 				height: 1500,
 			},
-			excludedCssUrls: [
+			excluded_css_urls: [
 				'https://kit-pro.fontawesome.com',
 			],
 			timeout: 15000, // Wait until screenshot taken or fail in 15 secs.
@@ -42,17 +43,17 @@ class Screenshot {
 		this.config = {
 			...this.config,
 			...ElementorScreenshotConfig,
-			timerLabel: `${ ElementorScreenshotConfig.post_id } - timer`,
+			timer_label: `${ ElementorScreenshotConfig.post_id } - timer`,
 		};
 
 		this.log( 'Screenshot init', 'time' );
 
 		if ( ! this.$elementor.length ) {
-			elementorCommon.helpers.consoleWarn( 'Screenshots: Elementor content was not found.' );
+			elementorCommon.helpers.consoleWarn(
+				'Screenshots: The content of this page is empty, the module will create a fake conent just for this screenshot.'
+			);
 
-			this.screenshotFailed();
-
-			return;
+			this.createFakeContent();
 		}
 
 		this.handleIFrames();
@@ -68,6 +69,22 @@ class Screenshot {
 			.then( this.save.bind( this ) )
 			.then( this.screenshotSucceed.bind( this ) )
 			.catch( this.screenshotFailed.bind( this ) );
+	}
+
+	createFakeContent() {
+		this.$elementor = jQuery( '<div></div>' ).css( {
+			height: this.config.crop.height,
+			width: this.config.crop.width,
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'center',
+		} );
+
+		this.$elementor.append(
+			jQuery( '<h1></h1>' ).css( { fontSize: '85px' } ).html( this.config.empty_content_headline )
+		);
+
+		document.body.prepend( this.$elementor );
 	}
 
 	/**
@@ -157,7 +174,7 @@ class Screenshot {
 	loadExternalCss() {
 		const excludedUrls = [
 			this.config.home_url,
-			...this.config.excludedCssUrls,
+			...this.config.excluded_css_urls,
 		];
 
 		const notSelector = excludedUrls
@@ -354,7 +371,7 @@ class Screenshot {
 		console.log( `${ this.config.post_id } - ${ message }` );
 
 		// eslint-disable-next-line no-console
-		console[ timerMethod ]( this.config.timerLabel );
+		console[ timerMethod ]( this.config.timer_label );
 	}
 }
 

@@ -53,6 +53,8 @@ function initialize() {
 		require( './core/editor/document/ui/component.spec' );
 		require( './core/editor/document/save/component.spec' );
 
+		require( './modules/screenshots/assets/js/editor/component.spec' );
+
 		require( './core/editor/data/globals/component.spec' );
 	} );
 
