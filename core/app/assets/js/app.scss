@@ -1,87 +1,114 @@
 @import "../styles/common";
+@import "./app-api";
 @import "../styles/base";
 @import "../styles/components";
 @import "../styles/shame";
 
-$app-background-color: tints(200);
-$app-sidebar-background-color: rgba(theme-colors(light), $opacity-05);
-$box-shadow-color: rgba(theme-colors(dark), $opacity-005);
-$app-sidebar-box-shadow: 0 2px 30px var(--box-shadow-color);
 
-:root {
-	--app-background-color: #{$app-background-color};
-	--app-sidebar-background-color: #{$app-sidebar-background-color};
-	--box-shadow-color: #{$box-shadow-color};
-}
+.eps-app {
+	font-size: $spp-font-size;
+	color: var(--body-color);
+	background-color: var(--app-background-color);
+	position: absolute;
+	border-radius: $app-radius;
+	box-shadow: $eps-box-shadow-size-3 var(--app-box-shadow-color);
+	overflow: hidden;
+	font-family: $eps-font-family; // todo: we have body definition for font familiy,consider removing
+	width: 100%;
+	max-width: $app-max-width;
 
-$app-dark-background-color: dark-tints(700);
-$app-sidebar-dark-background-color: dark-tints(700);
-$box-shadow-dark-color: rgba(theme-colors(dark), $opacity-015);
-
-.dark {
-	--app-background-color: #{$app-dark-background-color};
-	--app-sidebar-background-color: #{$app-sidebar-dark-background-color};
-	--box-shadow-color: #{$box-shadow-dark-color};
-}
-
-
-@media (min-width: 1440px) {
-	.elementor-templates-modal .dialog-widget-content {
-		max-width: 1440px;
+	@media (min-width: #{map-get($breakpoints, xl)}) {
+		max-width: $app-max-width-min-xl;
 	}
-}
 
-@media (max-width: 1439px) {
-	.elementor-templates-modal .dialog-widget-content {
-		max-width: 1200px;
+	&__lightbox {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: fixed;
+		height: 100%;
+		width: 100%;
+		background-color: var(--app-lightbox-background-color);
+		z-index: $app-lightbox-z-index;
+		bottom: 0;
+		left: 0;
 	}
-}
 
-.dialog-type-lightbox {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
+	&__header {
+		font-size: $app-header-font-size;
+		color: var(--app-header-color);
+		background-color: var(--app-header-background-color);
+		box-shadow: $app-header-box-shadow;
+		position: relative;
+		z-index: 1;
+		height: $app-header-height;
+		padding: $app-header-padding-y $spp-header-padding-x;
+	}
 
-:root {
-	--h1-font-size: #{type(h, "1")};
-	--h1-margin-bottom: #{spacing(20)};
+	&__header-buttons {
+		display: flex;
+		align-items: center;
+		flex-direction: row-reverse;
+		font-size: $app-header-buttons-font-size;
+	}
 
-	--hr-color: #{tints(300)};
-	--h1-color: #{tints(600)};
-	--h3-color: #{tints(800)};
-}
+	&__header-btn {
+		--button-background-color: var(--app-header-buttons-color);
+		padding-inline-start: $app-header-btn-padding-x;
+		font-size: $app-header-btn-font-size;
+		line-height: $app-header-btn-line-height;
 
-.dark {
-	--hr-color: #{dark-tints(500)};
-}
+		&:first-child:not(:last-child) {
+			border-inline-start: 1px solid var(--app-header-buttons-separator-color);
+		}
 
-h1 {
-	font-size: var(--h1-font-size);
-	margin-bottom: var(--h1-margin-bottom);
-}
+		&:not(:first-child) {
+			padding-inline-end: $app-header-btn-padding-x;
+		}
+	}
 
-hr {
-	border: 0 none;
-	border-bottom: 1px solid var(--hr-color);
-}
+	&__logo-title-wrapper {
+		display: flex;
+		align-items: center;
+	}
 
-.elementor-app {
-	font-size: type(text, base);
+	//todo: consider refactoring as a stand alone block.
+	&__logo {
+		display: block;
+		width: $app-logo-size;
+		height: $app-logo-size;
+		line-height: $app-logo-size;
+		text-align: center;
+		font-size: $app-logo-font-size;
+		border-radius: $app-logo-radius;
+		color: $app-logo-color;
+		background-color: $app-logo-background-color;
+
+		&:not(:last-child) {
+			margin-inline-end: $app-logo-margin-end;
+		}
+	}
+
+	//todo: consider refactoring as logo element.
+	&__title {
+		font-size: $app-title-font-size;
+		font-weight: $app-title-font-weight;
+		text-transform: uppercase;
+		margin-bottom: 0;
+	}
 
 	&__main {
 		display: flex;
-		height: 920px;
-		max-height: 85vh;
+		height: $app-main-height;
+		max-height: $app-main-max-height;
 		overflow: auto;
-		background-color: var(--app-background-color);
 	}
 
 	&__sidebar {
 		background-color: var(--app-sidebar-background-color);
-		padding-top: spacing(20);
-		width: 30%;
-		max-width: 275px;
+		padding-top: $app-sidebar-padding-top;
+		width: $app-sidebar-width;
+		max-width: $app-sidebar-max-width;
 		flex-grow: 0;
 		overflow: auto;
 		box-shadow: $app-sidebar-box-shadow;
@@ -89,22 +116,8 @@ hr {
 
 	&__content {
 		flex-grow: 1;
-		padding: 2.8125rem;
+		padding: $app-content-padding;
 		height: 100%;
 		overflow: scroll;
-	}
-}
-
-.video-wrapper {
-	position: relative;
-	padding-bottom: 56.25%;
-	padding-top: 25px;
-	height: 0;
-	iframe {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
 	}
 }
