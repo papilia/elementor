@@ -81,6 +81,7 @@ const entry = {
 const externals = {
 	'@wordpress/i18n': 'wp.i18n',
 		react: 'React',
+		'react-dom': 'ReactDOM',
 		'@elementor/app-ui': 'elementorAppPackages.appUi',
 		'@elementor/site-editor': 'elementorAppPackages.siteEditor',
 		'@elementor/router': 'elementorAppPackages.router',
@@ -89,6 +90,7 @@ const externals = {
 const plugins = [
 	new webpack.ProvidePlugin( {
 		React: 'react',
+		ReactDOM: 'react-dom',
 		PropTypes: 'prop-types',
 		__: ['@wordpress/i18n', '__'],
 	} )

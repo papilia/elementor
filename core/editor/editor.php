@@ -497,6 +497,7 @@ class Editor {
 				'nouislider',
 				'pickr',
 				'react',
+				'react-dom',
 			],
 			ELEMENTOR_VERSION,
 			true
