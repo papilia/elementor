@@ -1,5 +1,4 @@
 <?php
-
 namespace Elementor\Modules\Screenshots;
 
 use Elementor\Plugin;
@@ -12,7 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class Module extends BaseModule {
-
 	const SCREENSHOT_NONCE_ACTION = 'screenshot';
 	const SCREENSHOT_PROXY_NONCE_ACTION = 'screenshot_proxy';
 
@@ -92,9 +90,17 @@ class Module extends BaseModule {
 		);
 
 		wp_enqueue_script(
+			'html2canvas',
+			ELEMENTOR_ASSETS_URL . "/lib/html2canvas/js/html2canvas{$suffix}.js",
+			[],
+			'1.0.0-rc.5',
+			true
+		);
+
+		wp_enqueue_script(
 			'elementor-screenshot',
 			ELEMENTOR_URL . "assets/js/screenshot{$suffix}.js",
-			[ 'dom-to-image' ],
+			[ 'dom-to-image', 'html2canvas' ],
 			ELEMENTOR_VERSION,
 			true
 		);

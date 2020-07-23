@@ -17,8 +17,11 @@ class Screenshot {
 				width: 1200,
 				height: 1500,
 			},
-			excluded_css_urls: [
+			excluded_external_css_urls: [
 				'https://kit-pro.fontawesome.com',
+			],
+			external_images_urls: [
+				'https://i.ytimg.com', // Youtube images domain.
 			],
 			timeout: 15000, // Wait until screenshot taken or fail in 15 secs.
 			render_timeout: 5000, // Wait until all the element will be loaded or 5 sec and then take screenshot.
@@ -56,11 +59,11 @@ class Screenshot {
 			this.createFakeContent();
 		}
 
-		this.handleIFrames();
-		this.handleSlides();
 		this.hideUnnecessaryElements();
 		this.removeUnnecessaryElements();
+		this.handleIFrames();
 		this.loadExternalCss();
+		this.loadExternalImages();
 
 		Promise.resolve()
 			.then( this.createImage.bind( this ) )
@@ -71,6 +74,9 @@ class Screenshot {
 			.catch( this.screenshotFailed.bind( this ) );
 	}
 
+	/**
+	 * Fake content for documents that dont have any content.
+	 */
 	createFakeContent() {
 		this.$elementor = jQuery( '<div></div>' ).css( {
 			height: this.config.crop.height,
@@ -88,93 +94,13 @@ class Screenshot {
 	}
 
 	/**
-	 * Html to images libraries can not snapshot IFrames
-	 * this method convert all the IFrames to some other elements.
-	 */
-	handleIFrames() {
-		this.$elementor.find( 'iframe' ).each( ( index, el ) => {
-			const $iframe = jQuery( el );
-
-			const $iframeMask = jQuery( '<div />', {
-				css: {
-					background: 'gray',
-					width: $iframe.width(),
-					height: $iframe.height(),
-				},
-			} );
-
-			if ( $iframe.next().is( '.elementor-custom-embed-image-overlay' ) ) {
-				this.handleCustomEmbedImageIFrame( $iframe, $iframeMask );
-			} else if ( -1 !== $iframe.attr( 'src' ).search( 'youtu' ) ) {
-				this.handleYouTubeIFrame( $iframe, $iframeMask );
-			}
-
-			$iframe.before( $iframeMask );
-			$iframe.remove();
-		} );
-	}
-
-	/**
-	 * @param $iframe
-	 * @param $iframeMask
-	 */
-	handleCustomEmbedImageIFrame( $iframe, $iframeMask ) {
-		const regex = /url\(\"(.*)\"/gm;
-		const url = $iframe.next().css( 'backgroundImage' );
-		const matches = regex.exec( url );
-
-		$iframeMask.css( { background: $iframe.next().css( 'background' ) } );
-
-		$iframeMask.append( jQuery( '<img />', {
-			src: matches[ 1 ],
-			css: {
-				width: $iframe.width(),
-				height: $iframe.height(),
-			},
-		} ) );
-
-		$iframe.next().remove();
-	}
-
-	/**
-	 * @param $iframe
-	 * @param $iframeMask
-	 */
-	handleYouTubeIFrame( $iframe, $iframeMask ) {
-		const regex = /^.*(?:youtu.be\/|youtube(?:-nocookie)?.com\/(?:(?:watch)??(?:.*&)?vi?=|(?:embed|v|vi|user)\/))([^?&"'>]+)/;
-		const matches = regex.exec( $iframe.attr( 'src' ) );
-
-		$iframeMask.append( jQuery( '<img />', {
-			src: this.getScreenshotProxyUrl( `https://img.youtube.com/vi/${ matches[ 1 ] }/0.jpg` ),
-			crossOrigin: 'Anonymous',
-			css: {
-				width: $iframe.width(),
-				height: $iframe.height(),
-			},
-		} ) );
-	}
-
-	/**
-	 * Slides should show only the first slide, all the other slides will be removed.
-	 */
-	handleSlides() {
-		this.$elementor.find( '.elementor-slides' ).each( ( index, el ) => {
-			const $this = jQuery( el );
-
-			$this.find( '> *' ).not( $this.find( '> :first-child' ) ).each( ( childIndex, childEl ) => {
-				jQuery( childEl ).remove();
-			} );
-		} );
-	}
-
-	/**
 	 * CSS from another server cannot be loaded with the current dom to image library.
 	 * this method take all the links from another domain and proxy them.
 	 */
 	loadExternalCss() {
 		const excludedUrls = [
 			this.config.home_url,
-			...this.config.excluded_css_urls,
+			...this.config.excluded_external_css_urls,
 		];
 
 		const notSelector = excludedUrls
@@ -182,13 +108,48 @@ class Screenshot {
 			.join( ', ' );
 
 		jQuery( 'link' ).not( notSelector ).each( ( index, el ) => {
-			const $link = jQuery( el );
-			const $newLink = $link.clone();
+			const $link = jQuery( el ),
+				$newLink = $link.clone();
 
 			$newLink.attr( 'href', this.getScreenshotProxyUrl( $link.attr( 'href' ) ) );
 
 			jQuery( 'head' ).append( $newLink );
 			$link.remove();
+		} );
+	}
+
+	/**
+	 * Make a proxy to images urls that has some problems with cross origin (like youtube).
+	 */
+	loadExternalImages() {
+		const selector = this.config.external_images_urls
+			.map( ( url ) => `img[src^="${ url }"]` )
+			.join( ', ' );
+
+		jQuery( selector ).each( ( index, el ) => {
+			const $img = jQuery( el );
+
+			$img.attr( 'src', this.getScreenshotProxyUrl( $img.attr( 'src' ) ) );
+		} );
+	}
+
+	/**
+	 * Html to images libraries can not snapshot IFrames
+	 * this method convert all the IFrames to some other elements.
+	 */
+	handleIFrames() {
+		this.$elementor.find( 'iframe' ).each( ( index, el ) => {
+			const $iframe = jQuery( el ),
+				$iframeMask = jQuery( '<div />', {
+					css: {
+						background: 'gray',
+						width: $iframe.width(),
+						height: $iframe.height(),
+					},
+				} );
+
+			$iframe.before( $iframeMask );
+			$iframe.remove();
 		} );
 	}
 
@@ -249,7 +210,17 @@ class Screenshot {
 			.then( () => {
 				this.log( 'Start creating screenshot.' );
 
-				return domtoimage.toPng( document.body, {} );
+				const isSafari = /^((?!chrome|android).)*safari/i.test( navigator.userAgent );
+
+				if ( isSafari ) {
+					this.log( 'Creating screenshot with "html2canvas"' );
+					return html2canvas( document.body ).then( ( canvas ) => {
+						return canvas.toDataURL( 'image/png' );
+					} );
+				}
+
+				this.log( 'Creating screenshot with "dom-to-image"' );
+				return domtoimage.toPng( document.body );
 			} );
 	}
 
@@ -275,9 +246,9 @@ class Screenshot {
 	 * @returns {Promise<unknown>}
 	 */
 	cropCanvas( image ) {
-		const cropCanvas = document.createElement( 'canvas' );
-		const cropContext = cropCanvas.getContext( '2d' );
-		const ratio = this.config.crop.width / image.width;
+		const cropCanvas = document.createElement( 'canvas' ),
+			cropContext = cropCanvas.getContext( '2d' ),
+			ratio = this.config.crop.width / image.width;
 
 		cropCanvas.width = this.config.crop.width;
 		cropCanvas.height = this.config.crop.height > image.height ? image.height : this.config.crop.height;
