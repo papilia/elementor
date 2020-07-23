@@ -74,6 +74,7 @@ const entry = {
 	'editor-modules': path.resolve( __dirname, '../assets/dev/js/editor/modules.js' ),
 	'editor-document': path.resolve( __dirname, '../assets/dev/js/editor/editor-document.js' ),
 	'frontend-modules': path.resolve( __dirname, '../assets/dev/js/frontend/modules.js' ),
+	'screenshot': path.resolve( __dirname, '../modules/screenshots/assets/js/preview/screenshot.js' ),
 	'qunit-tests': path.resolve( __dirname, '../tests/qunit/main.js' ),
 };
 
@@ -89,7 +90,7 @@ const externals = {
 const plugins = [
 	new webpack.ProvidePlugin( {
 		React: 'react',
-		ReactDOM: 'ReactDOM',
+		ReactDOM: 'react-dom',
 		PropTypes: 'prop-types',
 		__: ['@wordpress/i18n', '__'],
 	} )
