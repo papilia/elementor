@@ -23,6 +23,10 @@
  * GNU General Public License for more details.
  */
 
+// ROMPITI
+die();
+
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
